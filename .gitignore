@@ -12,3 +12,4 @@ output/*
 .venv/**
 build/**
 settings.json
+src/UI/static/node_modules/*

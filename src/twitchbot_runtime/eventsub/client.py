@@ -91,8 +91,8 @@ class EventSubClient:
         @brief Populate members from a TwitchSettings wrapper.
 
         Copies bot client id/secret, broadcaster and bot user ids from the
-        wrapper and stores it for later use; webhook_secret is left empty
-        (read from settings.json elsewhere).
+        wrapper and stores it for later use; webhook_secret and callback_url
+        are left empty (read from settings.json elsewhere).
 
         @param settings: TwitchSettings-like object exposing
             bot_client_id, bot_client_secret, twitch_channel_id,
@@ -102,6 +102,7 @@ class EventSubClient:
         self.client_id = settings.bot_client_id
         self.client_secret = settings.bot_client_secret
         self.webhook_secret = ""
+        self.callback_url = ""
         self.broadcaster_user_id = settings.twitch_channel_id
         self.bot_user_id = settings.bot_channel_id
         self._twitch_settings = settings

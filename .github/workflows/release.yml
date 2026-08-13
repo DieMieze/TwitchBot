@@ -18,17 +18,17 @@ jobs:
         os: [windows-latest, ubuntu-latest]
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: "3.11"
 
       - name: Set up Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
-          node-version: "20"
+          node-version: "22"
           cache: npm
           cache-dependency-path: |
             src/UI/static/package-lock.json
@@ -88,7 +88,7 @@ jobs:
           ls -lh "$ARCHIVE"
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: ${{ env.ARCHIVE }}
           path: ${{ env.ARCHIVE }}
