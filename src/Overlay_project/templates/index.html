@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>Overlay</title>
+
+    <!-- Socket.IO (muss vor overlay.js, wenn dort verwendet) -->
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+
+
+    <style>
+        html, body {
+            margin: 0;
+            overflow: hidden;
+
+            /* Zum Testen: halbtransparenter dunkler Hintergrund */
+            background-color: rgba(10, 10, 10, 0.8); 
+        }
+
+        canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        #debug {
+            position: absolute;
+            top: 0;
+            left: 0;
+            background: #000;
+            color: lime;
+            z-index: 99999;
+            padding: 10px;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="overlay" width="1920" height="1080"></canvas>
+    <pre id="debug"></pre>
+    <script src="/static/dist/overlay.bundle.js"></script>
+</body>
+</html>

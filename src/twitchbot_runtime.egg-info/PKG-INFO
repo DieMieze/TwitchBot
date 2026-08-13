@@ -1,0 +1,148 @@
+Metadata-Version: 2.4
+Name: twitchbot-runtime
+Version: 0.1.0
+Summary: Modular Twitch event runtime with a triggers -> reactions pipeline.
+License: MIT
+Requires-Python: >=3.9
+Description-Content-Type: text/markdown
+Requires-Dist: pydantic>=2
+Requires-Dist: requests>=2.28
+Provides-Extra: overlay
+Requires-Dist: flask>=3; extra == "overlay"
+Requires-Dist: flask-socketio>=5; extra == "overlay"
+Requires-Dist: pillow>=10; extra == "overlay"
+Provides-Extra: dev
+Requires-Dist: pytest>=7; extra == "dev"
+Requires-Dist: pytest-mock>=3; extra == "dev"
+Provides-Extra: all
+Requires-Dist: flask>=3; extra == "all"
+Requires-Dist: flask-socketio>=5; extra == "all"
+Requires-Dist: pillow>=10; extra == "all"
+Requires-Dist: pytest>=7; extra == "all"
+Requires-Dist: pytest-mock>=3; extra == "all"
+
+# TwitchBot
+
+A Python-based Twitch bot runtime that loads JSON-configured triggers and reactions, processes Twitch EventSub webhooks, renders a browser overlay (StreamPet GIFs + text/GIF overlays), and ships a Flask web UI for configuration.
+
+## Current architecture
+
+- `src/twitchbot_runtime/` — modular runtime: event handling, trigger resolution, reaction execution, modes, handlers, overlay bridge, EventSub webhook + subscription client, timer scheduler.
+- `src/Overlay_project/` — Flask-SocketIO overlay (browser-rendered) + StreamPet GIF logic (gifuct-js).
+- `src/UI/` — Flask web UI for config management. Reads/writes `settings.json` (Runtime format).
+
+### Event flow
+
+`TwitchBot.handle_event(event_name, payload)` → `TriggerResolver.resolve()` matches triggers by conditions (`command` / `time` / `channel_point_reward` / `new_chatter`) → matched reactions collected → `ReactionEngine.execute()` dispatches each reaction to a handler. In silent/production, events arrive via the EventSub webhook on port 5002; in test mode, via the REPL/replay.
+
+## Requirements
+
+- Python 3.10+ (uses `from __future__ import annotations`)
+- Install dependencies:
+  ```bash
+  pip install -r requirements.txt
+  ```
+- A `settings.json` for runtime configuration (see `docs/settings.example.json`)
+- Twitch app credentials (client id/secret + a public callback URL) for silent/production
+
+## Running the bot
+
+The runtime has three execution modes:
+
+| mode | description |
+|---|---|
+| `test` | Interactive REPL / JSONL replay; no Twitch connection, no outgoing calls (default when no `settings.json` exists). |
+| `silent` | Subscribes to real EventSub events (same input as production) but sends no chat/moderation/clip calls; captures events to `output/silent_events.jsonl`. |
+| `production` | Full operation: EventSub webhook input, browser overlay. Chat/clip/moderation handlers run but outbound Twitch API calls are currently stubbed (wire up Helix/IRC in `bot.py` to enable real outbound). |
+
+> The legacy `bot` / `log_only` mode names are still accepted as aliases for `production` / `silent`.
+
+### Start in test mode (REPL)
+```bash
+python -m twitchbot_runtime --mode test
+```
+
+### Replay recorded events
+```bash
+python -m twitchbot_runtime --mode test --test-file events.jsonl
+```
+
+### Start in silent mode
+```bash
+python -m twitchbot_runtime --mode silent
+```
+
+### Start in production mode
+```bash
+python -m twitchbot_runtime --mode production
+```
+
+### Inspect settings without starting
+```bash
+python -m twitchbot_runtime --show-settings
+python -m twitchbot_runtime --mode silent --show-settings
+```
+
+## EventSub setup (silent/production)
+
+Both silent and production receive real Twitch events through an EventSub webhook receiver. You need a publicly reachable callback URL (e.g. via ngrok) and app credentials in `settings.json`:
+
+```json
+{
+  "twitch": {
+    "client_id": "your-client-id",
+    "client_secret": "your-client-secret",
+    "webhook_secret": "a-shared-secret",
+    "callback_url": "https://<your-public-host>/eventsub",
+    "broadcaster_user_id": "123456789"
+  },
+  "runtime": {
+    "execution_mode": "silent",
+    "webhook": {"host": "127.0.0.1", "port": 5002}
+  }
+}
+```
+
+The webhook server listens on port `5002` (configurable via `runtime.webhook.port`). The runtime registers EventSub subscriptions after the webhook is listening, so Twitch can verify the callback immediately. Outbound chat/clip transport remains a stub/logged boundary — `handle_event` is the input contract.
+
+## Ports
+
+| service | default port | source |
+|---|---|---|
+| Overlay (Flask-SocketIO) | 5000 | `Overlay_project/overlay_server.py` (subprocess via `OverlayFacade`) |
+| Web UI (Flask) | 5001 | `src/UI/Backend/UI.py` |
+| EventSub webhook (Flask) | 5002 | `twitchbot_runtime/eventsub/server.py` |
+
+## Configuration
+
+The runtime reads its entire configuration from a single `settings.json` file. There is no separate `commands.json`. See [docs/webui_and_settings.md](docs/webui_and_settings.md) and [docs/settings.example.json](docs/settings.example.json) for the full schema.
+
+### Reaction types (Runtime format)
+
+- `chat_reply` - send a chat message
+- `overlay_text` - show text on the overlay
+- `overlay_gif` - show a GIF on the overlay
+- `clip` - request clip creation
+- `counter` - trigger counter handler
+- `moderation` - trigger moderation handler
+- `streampet` - trigger a StreamPet animation
+
+## Testing
+
+Python tests:
+```bash
+python -m pytest -q
+```
+
+UI Jest tests (run `npm install` first in that dir):
+```bash
+cd src/UI/static && npm test
+```
+
+UI Flask tests are skipped automatically when Flask is not installed; install `requirements.txt` (or at least `flask`) to run them.
+
+## Documentation
+
+- [docs/webui_and_settings.md](docs/webui_and_settings.md) — settings schema + WebUI endpoints
+- [docs/architecture.md](docs/architecture.md) — event flow and runtime/overlay/UI/EventSub wiring
+- [docs/refactor_todo_checklist.md](docs/refactor_todo_checklist.md) — refactor status

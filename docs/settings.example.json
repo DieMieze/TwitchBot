@@ -1,0 +1,270 @@
+{
+  "runtime": {
+    "execution_mode": "test",
+    "data_dir": "data",
+    "logs_dir": "logs",
+    "webui": {
+      "enabled": true,
+      "port": 5001
+    },
+    "webhook": {
+      "host": "127.0.0.1",
+      "port": 5002
+    },
+    "overlay": {
+      "port": 5000
+    },
+    "pos_ui": {
+      "port": 5003
+    },
+    "oauth": {
+      "port": 5003
+    },
+    "silent_max_per_type": 50
+  },
+  "twitch": {
+    "webhook_secret": ""
+  },
+  "features": {
+    "moderation": {"enabled": true},
+    "overlay": {"enabled": true},
+    "webui": {"enabled": true}
+  },
+  "overlay": {
+    "idle_gif": "idle",
+    "text_defaults": {
+      "duration_ms": 2500,
+      "font_size": 32
+    }
+  },
+  "triggers": [
+    {
+      "name": "hello",
+      "when": {
+        "kind": "and",
+        "children": [
+          {"kind": "leaf", "condition": {"type": "command", "command": "!hello"}}
+        ]
+      },
+      "roles": [],
+      "reactions": {
+        "kind": "seq",
+        "children": [
+          {"kind": "reaction", "reaction": {"type": "chat_reply", "message": "Hallo {username}!"}},
+          {"kind": "reaction", "reaction": {"type": "overlay_gif", "gif_id": "hello", "text": "Hello"}}
+        ]
+      }
+    },
+    {
+      "name": "deaths",
+      "when": {
+        "kind": "and",
+        "children": [
+          {"kind": "leaf", "condition": {"type": "command", "command": "!deaths"}}
+        ]
+      },
+      "roles": [],
+      "reactions": {
+        "kind": "switch",
+        "on": "{args[0]}",
+        "cases": [
+          {
+            "equals": "+",
+            "then": {
+              "kind": "seq",
+              "children": [
+                {"kind": "reaction", "reaction": {"type": "counter", "action": "increment", "name": "deaths", "amount": "{args[1]}", "category": "default", "category_dependent": false}},
+                {"kind": "reaction", "reaction": {"type": "chat_reply", "message": "{counter:deaths:name} +{args[1]} → {counter:deaths:value}"}}
+              ]
+            }
+          },
+          {
+            "equals": "reset",
+            "then": {
+              "kind": "if",
+              "when": {"kind": "leaf", "condition": {"type": "role", "roles": ["broadcaster"]}},
+              "then": {
+                "kind": "seq",
+                "children": [
+                  {"kind": "reaction", "reaction": {"type": "counter", "action": "reset", "name": "deaths", "category": "default", "category_dependent": false}},
+                  {"kind": "reaction", "reaction": {"type": "chat_reply", "message": "{counter:deaths:name} zurückgesetzt"}}
+                ]
+              },
+              "else": {"kind": "reaction", "reaction": {"type": "chat_reply", "message": "Nur der Broadcaster darf das zurücksetzen."}}
+            }
+          }
+        ],
+        "default": {
+          "kind": "seq",
+          "children": [
+            {"kind": "reaction", "reaction": {"type": "counter", "action": "query", "name": "deaths", "category": "default", "category_dependent": false}},
+            {"kind": "reaction", "reaction": {"type": "chat_reply", "message": "Tode: {counter:deaths:value}{counter:deaths:subcounter_label}"}}
+          ]
+        }
+      }
+    },
+    {
+      "name": "timer_ping",
+      "when": {
+        "kind": "and",
+        "children": [
+          {"kind": "leaf", "condition": {"type": "time", "interval_minutes": 5}}
+        ]
+      },
+      "roles": [],
+      "reactions": {
+        "kind": "seq",
+        "children": [
+          {"kind": "reaction", "reaction": {"type": "chat_reply", "message": "Timer tick"}}
+        ]
+      }
+    },
+    {
+      "name": "reward_shoutout",
+      "when": {
+        "kind": "and",
+        "children": [
+          {"kind": "leaf", "condition": {"type": "channel_point_reward", "reward_id": "reward-shoutout-id"}}
+        ]
+      },
+      "roles": [],
+      "reactions": {
+        "kind": "seq",
+        "children": [
+          {"kind": "reaction", "reaction": {"type": "overlay_text", "text": "Shoutout für {username}"}},
+          {"kind": "reaction", "reaction": {"type": "streampet", "gif_id": "party"}}
+        ]
+      }
+    },
+    {
+      "name": "new_chatter_welcome",
+      "when": {
+        "kind": "and",
+        "children": [
+          {"kind": "leaf", "condition": {"type": "new_chatter", "time": 1800}}
+        ]
+      },
+      "roles": [],
+      "reactions": {
+        "kind": "seq",
+        "children": [
+          {"kind": "reaction", "reaction": {"type": "chat_reply", "message": "Willkommen zurück {username}! Schon lange nicht gesehen."}},
+          {"kind": "reaction", "reaction": {"type": "overlay_gif", "gif_id": "welcome", "text": "Neuer Chatter"}}
+        ]
+      }
+    },
+    {
+      "name": "first_time_chatter_welcome",
+      "when": {
+        "kind": "and",
+        "children": [
+          {"kind": "leaf", "condition": {"type": "first_time_chatter"}}
+        ]
+      },
+      "roles": [],
+      "reactions": {
+        "kind": "seq",
+        "children": [
+          {"kind": "reaction", "reaction": {"type": "chat_reply", "message": "Willkommen {username}! Schön, dass du zum ersten Mal da bist."}}
+        ]
+      }
+    },
+    {
+      "name": "mod_purge",
+      "when": {
+        "kind": "and",
+        "children": [
+          {"kind": "leaf", "condition": {"type": "command", "command": "!purge"}}
+        ]
+      },
+      "roles": ["mod", "broadcaster"],
+      "reactions": {
+        "kind": "seq",
+        "children": [
+          {"kind": "reaction", "reaction": {"type": "moderation", "action": "purge", "target": "{args[0]}"}}
+        ]
+      }
+    },
+    {
+      "name": "subscriber_only_shoutout",
+      "when": {
+        "kind": "and",
+        "children": [
+          {"kind": "leaf", "condition": {"type": "command", "command": "!so"}}
+        ]
+      },
+      "roles": ["subscriber", "vip", "mod", "broadcaster"],
+      "reactions": {
+        "kind": "seq",
+        "children": [
+          {"kind": "reaction", "reaction": {"type": "overlay_text", "text": "Shoutout für {args[0]}"}}
+        ]
+      }
+    },
+    {
+      "name": "follow_thanks",
+      "when": {
+        "kind": "and",
+        "children": [
+          {"kind": "leaf", "condition": {"type": "follow"}}
+        ]
+      },
+      "roles": ["everyone"],
+      "reactions": {
+        "kind": "seq",
+        "children": [
+          {"kind": "reaction", "reaction": {"type": "chat_reply", "message": "Danke für den Follow, {username}!"}}
+        ]
+      }
+    },
+    {
+      "name": "sub_thanks",
+      "when": {
+        "kind": "and",
+        "children": [
+          {"kind": "leaf", "condition": {"type": "sub"}}
+        ]
+      },
+      "roles": [],
+      "reactions": {
+        "kind": "seq",
+        "children": [
+          {"kind": "reaction", "reaction": {"type": "chat_reply", "message": "Willkommen, {username}!"}},
+          {"kind": "reaction", "reaction": {"type": "streampet", "gif_id": "sub"}}
+        ]
+      }
+    },
+    {
+      "name": "big_cheer",
+      "when": {
+        "kind": "and",
+        "children": [
+          {"kind": "leaf", "condition": {"type": "cheer", "min_bits": 100}}
+        ]
+      },
+      "roles": [],
+      "reactions": {
+        "kind": "seq",
+        "children": [
+          {"kind": "reaction", "reaction": {"type": "overlay_gif", "gif_id": "cheer", "text": "{username} cheered {args[0]} bits!"}}
+        ]
+      }
+    },
+    {
+      "name": "big_raid",
+      "when": {
+        "kind": "and",
+        "children": [
+          {"kind": "leaf", "condition": {"type": "raid", "min_viewers": 10}}
+        ]
+      },
+      "roles": [],
+      "reactions": {
+        "kind": "seq",
+        "children": [
+          {"kind": "reaction", "reaction": {"type": "chat_reply", "message": "Raid von {username} mit Viewern!"}}
+        ]
+      }
+    }
+  ]
+}

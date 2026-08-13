@@ -1,0 +1,186 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #1e1e1e; /* Dunkler Hintergrund */
+    color: white;
+    background-color: #1e1e1e; /* Dunkler Hintergrund */
+    color: white;
+}
+
+header {
+    background-color: #333;
+    color: white;
+    padding: 10px;
+    text-align: center;
+}
+
+nav button {
+    margin: 5px;
+    padding: 10px;
+    background-color: #555;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+nav button:hover {
+    background-color: #777;
+}
+
+main {
+    display: flex;
+    flex-direction: column;
+    /*height: calc(100vh - 250px); passt */ 
+    width: 95vw; /* wichtig! */
+}
+
+
+#counterList {
+    flex: 1;
+    min-width: 300px;
+    background-color: #2e2e2e;
+    padding: 10px;
+    overflow-y: auto;
+}
+
+#counterEditor {
+    flex: 2;
+    min-width: 400px;
+    background-color: #333;
+    padding: 20px;
+    overflow-y: auto;
+}
+
+.counter-container {
+    display: flex;
+    height: 100%;
+    width: 100%;
+}
+
+#counters{
+    flex: 1;
+    width: 100%;
+    height: calc(100vh - 100px); /* oder was für deinen Header und nav passt */
+}
+
+#commandList {
+    flex: 1;
+    min-width: 300px;
+    background-color: #2e2e2e;
+    padding: 10px;
+    overflow-y: auto;
+}
+
+#commandEditor {
+    flex: 2;
+    min-width: 400px;
+    background-color: #333;
+    padding: 20px;
+    overflow-y: auto;
+}
+
+.command-container {
+    display: flex;
+    height: 100%;
+    width: 100%;
+}
+
+#commands{
+    flex: 1;
+    width: 100%;
+    height: calc(100vh - 100px); /* oder was für deinen Header und nav passt */
+}
+
+.reaction-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    margin-bottom: 10px;
+    background: #222;
+    padding: 10px;
+    border-radius: 6px;
+}
+
+.reaction-row label {
+    margin-right: 10px;
+    min-width: 70px;
+}
+
+.data-container {
+    display: flex;
+    flex-direction: column;
+    margin-left: 10px;
+}
+
+.data-row {
+    display: flex;
+    align-items: center;
+    margin-bottom: 5px;
+}
+
+.data-row input {
+    margin-right: 5px;
+    width: 120px;
+}
+
+.hidden {
+    display: none;
+}
+
+label {
+    display: block;
+    margin-top: 10px;
+    font-weight: bold;
+}
+
+input, select, button {
+    margin: 5px 0;
+    padding: 5px;
+    width: 100%;
+}
+
+button {
+    width: auto;
+    padding: 5px 10px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+.toggle-button {
+    display: inline-block;
+    padding: 5px 10px;
+    margin: 5px;
+    background-color: #555;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+.toggle-button.active {
+    background-color: #007bff;
+    color: white;
+}
+
+.trigger-row {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.trigger-row select,
+.trigger-row input {
+    flex: 1; /* Gleiche Breite für Dropdown und Freitext */
+    margin-right: 10px;
+}
+
+.trigger-row button {
+    flex: 0; /* Button hat feste Größe */
+    padding: 5px 10px;
+}

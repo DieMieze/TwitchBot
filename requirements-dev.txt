@@ -1,0 +1,7 @@
+# Dev/test dependencies. Install with: pip install -r requirements-dev.txt
+-r requirements.txt
+flask>=3
+flask-socketio>=5
+pillow>=10
+pytest>=7
+pytest-mock>=3

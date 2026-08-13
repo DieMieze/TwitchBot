@@ -1,0 +1,66 @@
+name: Deploy (manual)
+
+on:
+  workflow_dispatch:
+    inputs:
+      os:
+        description: "Runner OS (ubuntu or windows)"
+        required: false
+        default: "ubuntu"
+        type: choice
+        options:
+          - ubuntu
+          - windows
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build wheel + overlay bundle
+    runs-on: ${{ inputs.os == 'windows' && 'windows-latest' || 'ubuntu-latest' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: |
+            src/UI/static/package-lock.json
+            src/Overlay_project/package-lock.json
+
+      - name: Install Python build deps
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements-dev.txt build
+
+      - name: Build overlay bundle
+        run: |
+          cd src/Overlay_project
+          npm ci
+          npm run build
+
+      - name: Build wheel
+        run: python -m build --wheel
+
+      - name: Upload wheel
+        uses: actions/upload-artifact@v4
+        with:
+          name: twitchbot-wheel-${{ inputs.os }}
+          path: dist/*.whl
+          if-no-files-found: error
+
+      - name: Upload overlay bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: overlay-bundle-${{ inputs.os }}
+          path: src/Overlay_project/static/dist/overlay.bundle.js
+          if-no-files-found: error

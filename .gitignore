@@ -1,0 +1,14 @@
+*.pyc
+*.log
+config.ini
+StreamPet/*.*
+*.txt
+src/Overlay_project/node_modules/*
+src/Overlay_project/static/gifuct-js/*
+test.*
+.vscode/*
+output/*
+**/.env
+.venv/**
+build/**
+settings.json

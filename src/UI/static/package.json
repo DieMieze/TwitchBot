@@ -1,0 +1,26 @@
+{
+  "name": "twitchbot-ui-tests",
+  "version": "1.0.0",
+  "description": "Test infrastructure for TwitchBot UI trigger/reaction and overlay logic",
+  "private": true,
+  "type": "commonjs",
+  "scripts": {
+    "test": "jest",
+    "test:watch": "jest --watch"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "jest-environment-jsdom": "^29.7.0"
+  },
+  "jest": {
+    "testEnvironment": "jsdom",
+    "testMatch": [
+      "**/__tests__/**/*.test.js"
+    ],
+    "moduleFileExtensions": [
+      "js",
+      "json"
+    ],
+    "verbose": true
+  }
+}

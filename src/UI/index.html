@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JSON File Manager</title>
+    <link rel="stylesheet" href="static/style.css">
+    <link rel="icon" href="static/favicon.ico">
+</head>
+<body>
+    <header>
+        <h1>JSON File Manager</h1>
+        <nav>
+            <button onclick="showSection('commands'); loadCommandEditor();">Commands</button>
+            <button onclick="showSection('ports'); loadPorts();">Ports</button>
+            <button onclick="showSection('features'); loadFeatures();">Features</button>
+            <button onclick="showSection('streampet'); loadStreamPet();">Overlay/StreamPet</button>
+            <button onclick="saveAndExit()">Save</button>
+        </nav>
+    </header>
+    <main>
+        <section id="commands" class="hidden">
+            <h2>Manage Commands</h2>
+            <div class="command-container">
+                <div id="commandList"></div>
+                <div id="commandEditor"></div>
+            </div>
+        </section>
+
+        <section id="ports" class="hidden">
+            <h2>Ports konfigurieren</h2>
+            <div id="portsFirstRunBanner" style="display:none;background:#fff3cd;border:1px solid #ffe69c;color:#333;padding:8px;margin-bottom:10px;border-radius:4px;">
+                Erststart: Alle Ports nutzen noch die Defaults. Passe sie hier zentral an und speichere pro Komponente.
+            </div>
+            <div id="portsOauthWarning" style="display:none;background:#f8d7da;border:1px solid #f1aeb5;color:#333;padding:8px;margin-bottom:10px;border-radius:4px;"></div>
+            <table id="portsTable" style="width:100%;border-collapse:collapse;"></table>
+            <div id="portsOauthUriBlock" style="display:none;margin-top:12px;padding:8px;background:#d1ecf1;border:1px solid #bee5eb;border-radius:4px;">
+                <label style="font-weight:bold;">OAuth Redirect-URI (Twitch Developer Console)</label>
+                <div style="display:flex;align-items:center;gap:6px;margin-top:4px;">
+                    <code id="portsOauthUri" style="flex:1;background:#fff;padding:6px;border-radius:3px;border:1px solid #ccc;"></code>
+                    <button type="button" onclick="copyOauthRedirectUri()">Kopieren</button>
+                </div>
+                <small style="display:block;margin-top:4px;">Trage diese URI exakt unter Applications &rarr; OAuth Redirect URLs ein.</small>
+            </div>
+        </section>
+
+        <section id="features" class="hidden">
+            <h2>Features</h2>
+            <p>Aktiviere/deaktiviere Runtime-Features. Änderungen werden beim nächsten Bot-Start wirksam.</p>
+            <div id="featuresTable"></div>
+        </section>
+
+        <section id="streampet" class="hidden">
+            <h2>Overlay / StreamPet</h2>
+            <p>Verwaltet <code>Stream_Pet.json</code> (Idle-GIF, Animationen, Sprechblase) und GIF-Uploads nach <code>StreamPet/</code>. Position/Font werden in der Pos-UI gepflegt.</p>
+            <div id="streampetStatus" style="margin-bottom:10px;"></div>
+
+            <label for="spIdle">Idle-GIF</label>
+            <select id="spIdle"></select>
+
+            <h3>Animationen</h3>
+            <table id="spAnimationsTable" style="width:100%;border-collapse:collapse;">
+                <thead>
+                    <tr><th>Name</th><th>GIF</th><th></th></tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+            <button type="button" onclick="addStreamPetAnimation()">+ Animation</button>
+
+            <h3>Sprechblase</h3>
+            <label for="spBubbleText">Sprechblasen-Text (z. B. &quot;Hi {username}&quot;)</label>
+            <input id="spBubbleText" type="text">
+            <label><input id="spBubbleToggle" type="checkbox"> Sprechblase anzeigen</label>
+
+            <h3>GIF hochladen</h3>
+            <input id="spUploadFile" type="file" accept=".gif">
+            <button type="button" onclick="uploadStreamPetGif()">Upload</button>
+            <small id="spUploadNote" style="display:block;margin-top:4px;">Hinweis: gleichnamige Dateien werden ueberschrieben.</small>
+
+            <div style="margin-top:16px;">
+                <button type="button" onclick="saveStreamPet()">Speichern</button>
+            </div>
+        </section>
+    </main>
+    <script src="static/labels.js"></script>
+    <script src="static/commands.js"></script>
+    <script src="static/ports.js"></script>
+    <script src="static/features.js"></script>
+    <script src="static/streampet.js"></script>
+    <script src="static/script.js"></script>
+</body>
+</html>

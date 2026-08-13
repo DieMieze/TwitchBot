@@ -1,0 +1,95 @@
+name: Release (standalone venv-tarball)
+
+on:
+  workflow_dispatch:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build tarball (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, ubuntu-latest]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: |
+            src/UI/static/package-lock.json
+            src/Overlay_project/package-lock.json
+
+      - name: Create virtualenv and install deps
+        shell: bash
+        run: |
+          python -m venv .venv
+          if [ "$RUNNER_OS" = "Windows" ]; then
+            .venv/Scripts/pip install --upgrade pip
+            .venv/Scripts/pip install -r requirements-dev.txt
+          else
+            .venv/bin/pip install --upgrade pip
+            .venv/bin/pip install -r requirements-dev.txt
+          fi
+
+      - name: Build overlay JS bundle
+        run: |
+          cd src/Overlay_project
+          npm ci
+          npm run build
+
+      - name: Install UI static deps (for local dev in tarball)
+        run: |
+          cd src/UI/static
+          npm ci
+
+      - name: Create archive (excluding transient dirs)
+        shell: bash
+        run: |
+          set -e
+          SHORT_SHA="${GITHUB_SHA::7}"
+          if [ "$RUNNER_OS" = "Windows" ]; then
+            ARCHIVE="twitchbot-windows-${SHORT_SHA}.zip"
+            # 7z is preinstalled on windows-latest and supports exclusions.
+            7z a -tzip "$ARCHIVE" . \
+              '-xr!.git' '-xr!.github' '-xr!node_modules' '-xr!__pycache__' \
+              '-xr!.mypy_cache' '-xr!.pytest_cache' '-xr!.ruff_cache' \
+              '-xr!build' '-xr!*.pyc'
+            echo "ARCHIVE=$ARCHIVE" >> "$GITHUB_ENV"
+          else
+            ARCHIVE="twitchbot-linux-${SHORT_SHA}.tar.gz"
+            tar -czf "$ARCHIVE" \
+              --exclude='.git' \
+              --exclude='.github' \
+              --exclude='node_modules' \
+              --exclude='__pycache__' \
+              --exclude='.mypy_cache' \
+              --exclude='.pytest_cache' \
+              --exclude='.ruff_cache' \
+              --exclude='build' \
+              --exclude='*.pyc' \
+              -C . .
+            echo "ARCHIVE=$ARCHIVE" >> "$GITHUB_ENV"
+          fi
+          ls -lh "$ARCHIVE"
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.ARCHIVE }}
+          path: ${{ env.ARCHIVE }}
+          retention-days: 30

@@ -1,0 +1,24 @@
+{
+  "idle": "StreamPet/Einhorn_Idle.gif",
+  "animations": {
+    "herz": "StreamPet/Einhorn_herz.gif",
+    "wave": "StreamPet/Einhorn_Hi.gif",
+    "keks": "StreamPet/Einhorn_keks.gif",
+    "patpat": "StreamPet/Einhorn_patpat.gif"
+  },
+  "stream_pet_config": {
+    "position": {
+      "x": 0.018,
+      "y": 0.6084
+    },
+    "height": 300,
+    "font": "Arial",
+    "text_size": 12,
+    "speech_bubble_position": {
+      "x": 60,
+      "y": -1
+    }
+  },
+  "speech_bubble_text": "Hi {username}",
+  "speech_bubble_toggle": true
+}
